@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Savings Goal</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,Arial;background:#070b12;color:#eef6ff;min-height:100vh}
+.wrap{max-width:850px;margin:auto;padding:32px 18px}.brand{font-size:27px;font-weight:800;margin-bottom:24px}.brand span{color:#70cfff}
+.card{background:#0e1622;border:1px solid #1d3044;border-radius:22px;padding:24px;box-shadow:0 15px 45px #0005}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.full{grid-column:1/-1}
+label{display:block;font-size:13px;color:#9db0c4;margin-bottom:7px}input{width:100%;padding:13px 14px;border-radius:12px;border:1px solid #29435b;background:#09111b;color:white;font-size:16px;outline:none}input:focus{border-color:#70cfff}
+.preview{height:210px;border:1px dashed #31516c;border-radius:15px;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#6e8295;background:#09111b}.preview img{width:100%;height:100%;object-fit:cover}
+button{border:0;border-radius:12px;padding:13px 18px;font-size:16px;font-weight:700;cursor:pointer}.primary{background:#70cfff;color:#06101a;width:100%}.add{background:#70cfff;color:#06101a;min-width:100px}
+.goal{margin-top:20px}.top{display:flex;justify-content:space-between;gap:15px;align-items:flex-start}.goal h1{margin:0 0 6px;font-size:28px}.muted{color:#91a5b8;font-size:14px}.amount{font-size:34px;font-weight:800;margin:20px 0 4px}.target{color:#9db0c4}.bar{height:14px;background:#1a2835;border-radius:99px;overflow:hidden;margin:18px 0 8px}.fill{height:100%;background:#45dc7c;border-radius:99px;width:0%;transition:.35s}.percent{color:#45dc7c;font-weight:800}.addbox{margin-top:22px;padding-top:20px;border-top:1px solid #1d3044;display:flex;gap:10px}.history{margin-top:20px}.row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #172535;color:#c7d4e0}.empty{text-align:center;color:#6f8498;padding:20px}
+.hidden{display:none}@media(max-width:650px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.top{flex-direction:column}.addbox{flex-direction:column}.amount{font-size:29px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">💰 <span>Savings</span> Goal</div>
+  <div class="card">
+    <div id="setup">
+      <div class="grid">
+        <div><label>Maqsad nomi</label><input id="name" placeholder="Masalan: Skuter"></div>
+        <div><label>Maqsad narxi ($)</label><input id="usd" type="number" placeholder="500"></div>
+        <div class="full"><label>Maqsad rasmi</label><input id="photo" type="file" accept="image/*"></div>
+        <div class="full"><div class="preview" id="preview">Rasm shu yerda ko‘rinadi</div></div>
+        <div class="full"><button class="primary" onclick="createGoal()">Maqsadni saqlash</button></div>
+      </div>
+    </div>
+
+    <div id="dashboard" class="hidden goal">
+      <div class="top"><div><h1 id="gname"></h1><div class="muted">Kurs: $1 = 12 000 so‘m</div></div>
+      <button onclick="resetGoal()" style="background:#182533;color:#9db0c4">Yangi maqsad</button></div>
+      <div id="gimage" class="preview" style="margin-top:18px"></div>
+      <div class="amount" id="saved">0 so‘m</div><div class="target">Maqsad: <b id="target">0 so‘m</b></div>
+      <div class="bar"><div class="fill" id="fill"></div></div>
+      <div><span class="percent" id="percent">0%</span> yig‘ildi</div>
+      <div class="addbox"><input id="add" type="number" min="1" placeholder="Masalan: 50 000 so‘m"><button class="add" onclick="addMoney()">+ Qo‘shish</button></div>
+      <div class="history"><h3>Yig‘ilgan pullar</h3><div id="history"></div></div>
+    </div>
+  </div>
+</div>
+<script>
+const KEY="savingsGoalV1", RATE=12000;
+let goal=JSON.parse(localStorage.getItem(KEY)||"null"), photoData="";
+const photo=document.getElementById("photo");
+photo.onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{photoData=r.result;document.getElementById("preview").innerHTML='<img src="'+photoData+'">'};r.readAsDataURL(f)};
+function createGoal(){
+ let name=document.getElementById("name").value.trim(), usd=+document.getElementById("usd").value;
+ if(!name||!usd)return alert("Maqsad nomi va narxini kiriting.");
+ goal={name,usd,target:usd*RATE,saved:0,photo:photoData,history:[]};save();render();
+}
+function addMoney(){let n=+document.getElementById("add").value;if(!n||n<0)return;goal.saved+=n;goal.history.unshift({amount:n,date:new Date().toLocaleString("uz-UZ")});save();document.getElementById("add").value="";render()}
+function save(){localStorage.setItem(KEY,JSON.stringify(goal))}
+function money(n){return new Intl.NumberFormat("uz-UZ").format(Math.round(n))+" so‘m"}
+function render(){
+ document.getElementById("setup").classList.add("hidden");document.getElementById("dashboard").classList.remove("hidden");
+ document.getElementById("gname").textContent=goal.name;document.getElementById("target").textContent=money(goal.target);document.getElementById("saved").textContent=money(goal.saved);
+ let p=Math.min(100,goal.saved/goal.target*100);document.getElementById("percent").textContent=p.toFixed(p%1?1:0)+"%";document.getElementById("fill").style.width=p+"%";
+ document.getElementById("gimage").innerHTML=goal.photo?'<img src="'+goal.photo+'">':"Rasm tanlanmagan";
+ document.getElementById("history").innerHTML=goal.history.length?goal.history.map(x=>'<div class="row"><span>'+x.date+'</span><b>+'+money(x.amount)+'</b></div>').join(""):'<div class="empty">Hali pul qo‘shilmagan.</div>';
+}
+function resetGoal(){if(confirm("Joriy maqsadni o‘chirasizmi?")){localStorage.removeItem(KEY);location.reload()}}
+if(goal)render();
+</script>
+</body></html>
