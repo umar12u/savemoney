@@ -4,65 +4,1304 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Savings Goal</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,Arial;background:#070b12;color:#eef6ff;min-height:100vh}
-.wrap{max-width:850px;margin:auto;padding:32px 18px}.brand{font-size:27px;font-weight:800;margin-bottom:24px}.brand span{color:#70cfff}
-.card{background:#0e1622;border:1px solid #1d3044;border-radius:22px;padding:24px;box-shadow:0 15px 45px #0005}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.full{grid-column:1/-1}
-label{display:block;font-size:13px;color:#9db0c4;margin-bottom:7px}input{width:100%;padding:13px 14px;border-radius:12px;border:1px solid #29435b;background:#09111b;color:white;font-size:16px;outline:none}input:focus{border-color:#70cfff}
-.preview{height:210px;border:1px dashed #31516c;border-radius:15px;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#6e8295;background:#09111b}.preview img{width:100%;height:100%;object-fit:cover}
-button{border:0;border-radius:12px;padding:13px 18px;font-size:16px;font-weight:700;cursor:pointer}.primary{background:#70cfff;color:#06101a;width:100%}.add{background:#70cfff;color:#06101a;min-width:100px}
-.goal{margin-top:20px}.top{display:flex;justify-content:space-between;gap:15px;align-items:flex-start}.goal h1{margin:0 0 6px;font-size:28px}.muted{color:#91a5b8;font-size:14px}.amount{font-size:34px;font-weight:800;margin:20px 0 4px}.target{color:#9db0c4}.bar{height:14px;background:#1a2835;border-radius:99px;overflow:hidden;margin:18px 0 8px}.fill{height:100%;background:#45dc7c;border-radius:99px;width:0%;transition:.35s}.percent{color:#45dc7c;font-weight:800}.addbox{margin-top:22px;padding-top:20px;border-top:1px solid #1d3044;display:flex;gap:10px}.history{margin-top:20px}.row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #172535;color:#c7d4e0}.empty{text-align:center;color:#6f8498;padding:20px}
-.hidden{display:none}@media(max-width:650px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.top{flex-direction:column}.addbox{flex-direction:column}.amount{font-size:29px}}
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Inter,system-ui,Arial;
+  background:#070b12;
+  color:#eef6ff;
+  min-height:100vh;
+}
+
+.wrap{
+  max-width:850px;
+  margin:auto;
+  padding:32px 18px;
+}
+
+.brand{
+  font-size:27px;
+  font-weight:800;
+  margin-bottom:24px;
+}
+
+.brand span{
+  color:#70cfff;
+}
+
+.card{
+  background:#0e1622;
+  border:1px solid #1d3044;
+  border-radius:22px;
+  padding:24px;
+  box-shadow:0 15px 45px #0005;
+}
+
+label{
+  display:block;
+  font-size:13px;
+  color:#9db0c4;
+  margin-bottom:7px;
+}
+
+input{
+  width:100%;
+  padding:13px 14px;
+  border-radius:12px;
+  border:1px solid #29435b;
+  background:#09111b;
+  color:white;
+  font-size:16px;
+  outline:none;
+}
+
+input:focus{
+  border-color:#70cfff;
+}
+
+button{
+  border:0;
+  border-radius:12px;
+  padding:13px 18px;
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.primary{
+  background:#70cfff;
+  color:#06101a;
+  width:100%;
+}
+
+.google{
+  background:white;
+  color:#111;
+  width:100%;
+  margin-top:10px;
+}
+
+.secondary{
+  background:#182533;
+  color:#c7d4e0;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+
+.full{
+  grid-column:1/-1;
+}
+
+.auth-tabs{
+  display:flex;
+  gap:8px;
+  margin-bottom:20px;
+}
+
+.auth-tabs button{
+  flex:1;
+  background:#182533;
+  color:#9db0c4;
+}
+
+.auth-tabs button.active{
+  background:#70cfff;
+  color:#06101a;
+}
+
+.auth-error{
+  color:#ff7070;
+  font-size:14px;
+  margin-top:12px;
+}
+
+.auth-success{
+  color:#45dc7c;
+  font-size:14px;
+  margin-top:12px;
+}
+
+.preview{
+  min-height:210px;
+  border:1px dashed #31516c;
+  border-radius:15px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  color:#6e8295;
+  background:#09111b;
+  padding:10px;
+}
+
+.preview img{
+  width:100%;
+  height:100%;
+  max-height:400px;
+  object-fit:contain;
+  display:block;
+}
+
+.goal{
+  margin-top:20px;
+}
+
+.top{
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+  align-items:flex-start;
+}
+
+.goal h1{
+  margin:0 0 6px;
+  font-size:28px;
+}
+
+.muted{
+  color:#91a5b8;
+  font-size:14px;
+}
+
+.amount{
+  font-size:34px;
+  font-weight:800;
+  margin:20px 0 4px;
+}
+
+.target{
+  color:#9db0c4;
+}
+
+.bar{
+  height:14px;
+  background:#1a2835;
+  border-radius:99px;
+  overflow:hidden;
+  margin:18px 0 8px;
+}
+
+.fill{
+  height:100%;
+  background:#45dc7c;
+  border-radius:99px;
+  width:0%;
+  transition:.35s;
+}
+
+.percent{
+  color:#45dc7c;
+  font-weight:800;
+}
+
+.addbox{
+  margin-top:22px;
+  padding-top:20px;
+  border-top:1px solid #1d3044;
+  display:flex;
+  gap:10px;
+}
+
+.add{
+  background:#70cfff;
+  color:#06101a;
+  min-width:100px;
+}
+
+.history{
+  margin-top:20px;
+}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:12px 0;
+  border-bottom:1px solid #172535;
+  color:#c7d4e0;
+}
+
+.row b{
+  color:#45dc7c;
+}
+
+.empty{
+  text-align:center;
+  color:#6f8498;
+  padding:20px;
+}
+
+.userbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:18px;
+  padding:12px 14px;
+  background:#09111b;
+  border:1px solid #1d3044;
+  border-radius:12px;
+}
+
+.useremail{
+  color:#9db0c4;
+  font-size:14px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.hidden{
+  display:none!important;
+}
+
+@media(max-width:650px){
+  .wrap{
+    padding:20px 12px;
+  }
+
+  .card{
+    padding:18px;
+    border-radius:18px;
+  }
+
+  .grid{
+    grid-template-columns:1fr;
+  }
+
+  .full{
+    grid-column:auto;
+  }
+
+  .top{
+    flex-direction:column;
+  }
+
+  .top button{
+    width:100%;
+  }
+
+  .addbox{
+    flex-direction:column;
+  }
+
+  .add{
+    width:100%;
+  }
+
+  .amount{
+    font-size:29px;
+  }
+
+  .goal h1{
+    font-size:24px;
+  }
+
+  .userbar{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .userbar button{
+    width:100%;
+  }
+}
 </style>
 </head>
+
 <body>
+
 <div class="wrap">
-  <div class="brand">💰 <span>Savings</span> Goal</div>
-  <div class="card">
-    <div id="setup">
-      <div class="grid">
-        <div><label>Maqsad nomi</label><input id="name" placeholder="Masalan: Skuter"></div>
-        <div><label>Maqsad narxi ($)</label><input id="usd" type="number" placeholder="500"></div>
-        <div class="full"><label>Maqsad rasmi</label><input id="photo" type="file" accept="image/*"></div>
-        <div class="full"><div class="preview" id="preview">Rasm shu yerda ko‘rinadi</div></div>
-        <div class="full"><button class="primary" onclick="createGoal()">Maqsadni saqlash</button></div>
-      </div>
+
+  <div class="brand">
+    💰 <span>Savings</span> Goal
+  </div>
+
+  <!-- AUTH -->
+  <div class="card" id="authCard">
+
+    <div class="auth-tabs">
+      <button id="loginTab" class="active" onclick="showLogin()">Kirish</button>
+      <button id="signupTab" onclick="showSignup()">Ro‘yxatdan o‘tish</button>
     </div>
 
-    <div id="dashboard" class="hidden goal">
-      <div class="top"><div><h1 id="gname"></h1><div class="muted">Kurs: $1 = 12 000 so‘m</div></div>
-      <button onclick="resetGoal()" style="background:#182533;color:#9db0c4">Yangi maqsad</button></div>
-      <div id="gimage" class="preview" style="margin-top:18px"></div>
-      <div class="amount" id="saved">0 so‘m</div><div class="target">Maqsad: <b id="target">0 so‘m</b></div>
-      <div class="bar"><div class="fill" id="fill"></div></div>
-      <div><span class="percent" id="percent">0%</span> yig‘ildi</div>
-      <div class="addbox"><input id="add" type="number" min="1" placeholder="Masalan: 50 000 so‘m"><button class="add" onclick="addMoney()">+ Qo‘shish</button></div>
-      <div class="history"><h3>Yig‘ilgan pullar</h3><div id="history"></div></div>
+    <div id="loginForm">
+
+      <label>Email</label>
+      <input id="loginEmail" type="email" placeholder="example@gmail.com">
+
+      <br><br>
+
+      <label>Password</label>
+      <input id="loginPassword" type="password" placeholder="Password">
+
+      <br><br>
+
+      <button class="primary" onclick="loginEmail()">
+        Kirish
+      </button>
+
+      <button class="google" onclick="loginGoogle()">
+        🌐 Google orqali kirish
+      </button>
+
     </div>
+
+    <div id="signupForm" class="hidden">
+
+      <label>Email</label>
+      <input id="signupEmail" type="email" placeholder="example@gmail.com">
+
+      <br><br>
+
+      <label>Password</label>
+      <input id="signupPassword" type="password" placeholder="Kamida 6 ta belgi">
+
+      <br><br>
+
+      <button class="primary" onclick="signupEmail()">
+        Account yaratish
+      </button>
+
+      <button class="google" onclick="loginGoogle()">
+        🌐 Google orqali kirish
+      </button>
+
+    </div>
+
+    <div id="authMessage"></div>
+
   </div>
+
+
+  <!-- APP -->
+  <div id="app" class="hidden">
+
+    <div class="userbar">
+      <div class="useremail" id="userEmail"></div>
+      <button class="secondary" onclick="logout()">Chiqish</button>
+    </div>
+
+    <div class="card">
+
+      <!-- CREATE GOAL -->
+      <div id="setup">
+
+        <div class="grid">
+
+          <div>
+            <label>Maqsad nomi</label>
+            <input id="name" placeholder="Masalan: Skuter">
+          </div>
+
+          <div>
+            <label>Maqsad narxi ($)</label>
+            <input id="usd" type="number" placeholder="500">
+          </div>
+
+          <div class="full">
+            <label>Maqsad rasmi</label>
+            <input id="photo" type="file" accept="image/*">
+          </div>
+
+          <div class="full">
+            <div class="preview" id="preview">
+              Rasm shu yerda ko‘rinadi
+            </div>
+          </div>
+
+          <div class="full">
+            <button class="primary" onclick="createGoal()">
+              Maqsadni saqlash
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- DASHBOARD -->
+      <div id="dashboard" class="hidden goal">
+
+        <div class="top">
+
+          <div>
+            <h1 id="gname"></h1>
+            <div class="muted">
+              Kurs: $1 = 12 000 so‘m
+            </div>
+          </div>
+
+          <button
+            onclick="resetGoal()"
+            style="background:#182533;color:#9db0c4">
+            Yangi maqsad
+          </button>
+
+        </div>
+
+        <div
+          id="gimage"
+          class="preview"
+          style="margin-top:18px">
+        </div>
+
+        <div class="amount" id="saved">
+          0 so‘m
+        </div>
+
+        <div class="target">
+          Maqsad: <b id="target">0 so‘m</b>
+        </div>
+
+        <div class="bar">
+          <div class="fill" id="fill"></div>
+        </div>
+
+        <div>
+          <span class="percent" id="percent">0%</span>
+          yig‘ildi
+        </div>
+
+        <div class="addbox">
+
+          <input
+            id="add"
+            type="number"
+            min="1"
+            placeholder="Masalan: 50 000 so‘m">
+
+          <button class="add" onclick="addMoney()">
+            + Qo‘shish
+          </button>
+
+        </div>
+
+        <div class="history">
+
+          <h3>Yig‘ilgan pullar</h3>
+
+          <div id="history"></div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
 </div>
+
+
 <script>
-const KEY="savingsGoalV1", RATE=12000;
-let goal=JSON.parse(localStorage.getItem(KEY)||"null"), photoData="";
-const photo=document.getElementById("photo");
-photo.onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{photoData=r.result;document.getElementById("preview").innerHTML='<img src="'+photoData+'">'};r.readAsDataURL(f)};
-function createGoal(){
- let name=document.getElementById("name").value.trim(), usd=+document.getElementById("usd").value;
- if(!name||!usd)return alert("Maqsad nomi va narxini kiriting.");
- goal={name,usd,target:usd*RATE,saved:0,photo:photoData,history:[]};save();render();
+
+/* =========================
+   SUPABASE
+========================= */
+
+const SUPABASE_URL = "YOUR_SUPABASE_URL";
+const SUPABASE_KEY = "YOUR_SUPABASE_PUBLISHABLE_KEY";
+
+const supabaseClient =
+  supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+const RATE = 12000;
+
+let currentUser = null;
+let goal = null;
+let photoFile = null;
+
+
+/* =========================
+   AUTH UI
+========================= */
+
+function showLogin(){
+
+  document
+    .getElementById("loginForm")
+    .classList.remove("hidden");
+
+  document
+    .getElementById("signupForm")
+    .classList.add("hidden");
+
+  document
+    .getElementById("loginTab")
+    .classList.add("active");
+
+  document
+    .getElementById("signupTab")
+    .classList.remove("active");
+
+  clearAuthMessage();
 }
-function addMoney(){let n=+document.getElementById("add").value;if(!n||n<0)return;goal.saved+=n;goal.history.unshift({amount:n,date:new Date().toLocaleString("uz-UZ")});save();document.getElementById("add").value="";render()}
-function save(){localStorage.setItem(KEY,JSON.stringify(goal))}
-function money(n){return new Intl.NumberFormat("uz-UZ").format(Math.round(n))+" so‘m"}
-function render(){
- document.getElementById("setup").classList.add("hidden");document.getElementById("dashboard").classList.remove("hidden");
- document.getElementById("gname").textContent=goal.name;document.getElementById("target").textContent=money(goal.target);document.getElementById("saved").textContent=money(goal.saved);
- let p=Math.min(100,goal.saved/goal.target*100);document.getElementById("percent").textContent=p.toFixed(p%1?1:0)+"%";document.getElementById("fill").style.width=p+"%";
- document.getElementById("gimage").innerHTML=goal.photo?'<img src="'+goal.photo+'">':"Rasm tanlanmagan";
- document.getElementById("history").innerHTML=goal.history.length?goal.history.map(x=>'<div class="row"><span>'+x.date+'</span><b>+'+money(x.amount)+'</b></div>').join(""):'<div class="empty">Hali pul qo‘shilmagan.</div>';
+
+
+function showSignup(){
+
+  document
+    .getElementById("loginForm")
+    .classList.add("hidden");
+
+  document
+    .getElementById("signupForm")
+    .classList.remove("hidden");
+
+  document
+    .getElementById("loginTab")
+    .classList.remove("active");
+
+  document
+    .getElementById("signupTab")
+    .classList.add("active");
+
+  clearAuthMessage();
 }
-function resetGoal(){if(confirm("Joriy maqsadni o‘chirasizmi?")){localStorage.removeItem(KEY);location.reload()}}
-if(goal)render();
+
+
+function showAuthMessage(message, success=false){
+
+  const el =
+    document.getElementById("authMessage");
+
+  el.textContent = message;
+
+  el.className =
+    success
+      ? "auth-success"
+      : "auth-error";
+}
+
+
+function clearAuthMessage(){
+
+  const el =
+    document.getElementById("authMessage");
+
+  el.textContent = "";
+  el.className = "";
+}
+
+
+/* =========================
+   EMAIL SIGNUP
+========================= */
+
+async function signupEmail(){
+
+  const email =
+    document
+      .getElementById("signupEmail")
+      .value
+      .trim();
+
+  const password =
+    document
+      .getElementById("signupPassword")
+      .value;
+
+  if(!email || !password){
+
+    showAuthMessage(
+      "Email va passwordni kiriting."
+    );
+
+    return;
+  }
+
+  if(password.length < 6){
+
+    showAuthMessage(
+      "Password kamida 6 ta belgidan iborat bo‘lishi kerak."
+    );
+
+    return;
+  }
+
+  const { error } =
+    await supabaseClient.auth.signUp({
+      email,
+      password
+    });
+
+  if(error){
+
+    showAuthMessage(error.message);
+    return;
+  }
+
+  showAuthMessage(
+    "Account yaratildi. Endi login qiling.",
+    true
+  );
+
+  showLogin();
+}
+
+
+/* =========================
+   EMAIL LOGIN
+========================= */
+
+async function loginEmail(){
+
+  const email =
+    document
+      .getElementById("loginEmail")
+      .value
+      .trim();
+
+  const password =
+    document
+      .getElementById("loginPassword")
+      .value;
+
+  if(!email || !password){
+
+    showAuthMessage(
+      "Email va passwordni kiriting."
+    );
+
+    return;
+  }
+
+  const { error } =
+    await supabaseClient.auth.signInWithPassword({
+      email,
+      password
+    });
+
+  if(error){
+
+    showAuthMessage(error.message);
+    return;
+  }
+}
+
+
+/* =========================
+   GOOGLE LOGIN
+========================= */
+
+async function loginGoogle(){
+
+  const { error } =
+    await supabaseClient.auth.signInWithOAuth({
+
+      provider:"google",
+
+      options:{
+        redirectTo:window.location.origin
+      }
+
+    });
+
+  if(error){
+
+    showAuthMessage(error.message);
+
+  }
+
+}
+
+
+/* =========================
+   LOGOUT
+========================= */
+
+async function logout(){
+
+  await supabaseClient.auth.signOut();
+
+  location.reload();
+
+}
+
+
+/* =========================
+   PHOTO PREVIEW
+========================= */
+
+document
+  .getElementById("photo")
+  .addEventListener("change",function(e){
+
+    photoFile =
+      e.target.files[0];
+
+    if(!photoFile)return;
+
+    const reader =
+      new FileReader();
+
+    reader.onload=function(){
+
+      document
+        .getElementById("preview")
+        .innerHTML =
+        `<img src="${reader.result}">`;
+
+    };
+
+    reader.readAsDataURL(photoFile);
+
+  });
+
+
+/* =========================
+   CREATE GOAL
+========================= */
+
+async function createGoal(){
+
+  const name =
+    document
+      .getElementById("name")
+      .value
+      .trim();
+
+  const usd =
+    Number(
+      document
+        .getElementById("usd")
+        .value
+    );
+
+  if(!name || !usd){
+
+    alert(
+      "Maqsad nomi va narxini kiriting."
+    );
+
+    return;
+  }
+
+
+  let imageUrl = null;
+
+
+  /* IMAGE UPLOAD */
+
+  if(photoFile){
+
+    const extension =
+      photoFile.name
+        .split(".")
+        .pop();
+
+    const fileName =
+      `${currentUser.id}/${crypto.randomUUID()}.${extension}`;
+
+
+    const { error:uploadError } =
+      await supabaseClient
+        .storage
+        .from("goal-images")
+        .upload(
+          fileName,
+          photoFile,
+          {
+            cacheControl:"3600",
+            upsert:false
+          }
+        );
+
+
+    if(uploadError){
+
+      alert(
+        "Rasm yuklashda xatolik: " +
+        uploadError.message
+      );
+
+      return;
+    }
+
+
+    const { data } =
+      supabaseClient
+        .storage
+        .from("goal-images")
+        .getPublicUrl(fileName);
+
+    imageUrl =
+      data.publicUrl;
+
+  }
+
+
+  /* DATABASE */
+
+  const { data,error } =
+    await supabaseClient
+      .from("goals")
+      .insert({
+
+        user_id:currentUser.id,
+
+        name:name,
+
+        target_amount:
+          usd * RATE,
+
+        image_url:imageUrl
+
+      })
+
+      .select()
+
+      .single();
+
+
+  if(error){
+
+    alert(
+      "Maqsadni saqlashda xatolik: " +
+      error.message
+    );
+
+    return;
+  }
+
+
+  goal = data;
+
+  await renderDashboard();
+
+}
+
+
+/* =========================
+   LOAD GOAL
+========================= */
+
+async function loadGoal(){
+
+  const { data,error } =
+    await supabaseClient
+      .from("goals")
+      .select("*")
+      .eq("user_id",currentUser.id)
+      .order("created_at",{ascending:false})
+      .limit(1)
+      .maybeSingle();
+
+
+  if(error){
+
+    console.error(error);
+    return;
+  }
+
+
+  goal = data;
+
+
+  if(goal){
+
+    await renderDashboard();
+
+  }else{
+
+    showSetup();
+
+  }
+
+}
+
+
+/* =========================
+   SHOW SETUP
+========================= */
+
+function showSetup(){
+
+  document
+    .getElementById("setup")
+    .classList.remove("hidden");
+
+  document
+    .getElementById("dashboard")
+    .classList.add("hidden");
+
+}
+
+
+/* =========================
+   ADD MONEY
+========================= */
+
+async function addMoney(){
+
+  const input =
+    document
+      .getElementById("add");
+
+  const amount =
+    Number(input.value);
+
+
+  if(!amount || amount <= 0){
+
+    return;
+  }
+
+
+  const { error } =
+    await supabaseClient
+      .from("transactions")
+      .insert({
+
+        goal_id:goal.id,
+
+        user_id:currentUser.id,
+
+        amount:amount
+
+      });
+
+
+  if(error){
+
+    alert(
+      "Pul qo‘shishda xatolik: " +
+      error.message
+    );
+
+    return;
+  }
+
+
+  input.value = "";
+
+  await renderDashboard();
+
+}
+
+
+/* =========================
+   LOAD TRANSACTIONS
+========================= */
+
+async function loadTransactions(){
+
+  const { data,error } =
+    await supabaseClient
+      .from("transactions")
+      .select("*")
+      .eq("goal_id",goal.id)
+      .eq("user_id",currentUser.id)
+      .order("created_at",{ascending:false});
+
+
+  if(error){
+
+    console.error(error);
+    return [];
+
+  }
+
+
+  return data || [];
+
+}
+
+
+/* =========================
+   DASHBOARD
+========================= */
+
+async function renderDashboard(){
+
+  document
+    .getElementById("setup")
+    .classList.add("hidden");
+
+  document
+    .getElementById("dashboard")
+    .classList.remove("hidden");
+
+
+  document
+    .getElementById("gname")
+    .textContent =
+    goal.name;
+
+
+  document
+    .getElementById("target")
+    .textContent =
+    money(goal.target_amount);
+
+
+  const transactions =
+    await loadTransactions();
+
+
+  const saved =
+    transactions.reduce(
+      (sum,item)=>
+        sum + Number(item.amount),
+      0
+    );
+
+
+  document
+    .getElementById("saved")
+    .textContent =
+    money(saved);
+
+
+  const percentage =
+    Math.min(
+      100,
+      saved /
+      Number(goal.target_amount) *
+      100
+    );
+
+
+  document
+    .getElementById("percent")
+    .textContent =
+    percentage.toFixed(
+      percentage % 1 ? 1 : 0
+    ) + "%";
+
+
+  document
+    .getElementById("fill")
+    .style.width =
+    percentage + "%";
+
+
+  const image =
+    document
+      .getElementById("gimage");
+
+
+  if(goal.image_url){
+
+    image.innerHTML =
+      `<img src="${goal.image_url}">`;
+
+  }else{
+
+    image.textContent =
+      "Rasm tanlanmagan";
+
+  }
+
+
+  const history =
+    document
+      .getElementById("history");
+
+
+  if(!transactions.length){
+
+    history.innerHTML =
+      '<div class="empty">Hali pul qo‘shilmagan.</div>';
+
+    return;
+  }
+
+
+  history.innerHTML =
+    transactions
+      .map(item=>{
+
+        const date =
+          new Date(
+            item.created_at
+          ).toLocaleString(
+            "uz-UZ"
+          );
+
+        return `
+          <div class="row">
+            <span>${date}</span>
+            <b>+${money(item.amount)}</b>
+          </div>
+        `;
+
+      })
+      .join("");
+
+}
+
+
+/* =========================
+   RESET GOAL
+========================= */
+
+async function resetGoal(){
+
+  if(
+    !confirm(
+      "Joriy maqsadni o‘chirasizmi?"
+    )
+  ){
+
+    return;
+
+  }
+
+
+  const { error } =
+    await supabaseClient
+      .from("goals")
+      .delete()
+      .eq("id",goal.id)
+      .eq("user_id",currentUser.id);
+
+
+  if(error){
+
+    alert(error.message);
+    return;
+
+  }
+
+
+  goal = null;
+
+  showSetup();
+
+}
+
+
+/* =========================
+   MONEY FORMAT
+========================= */
+
+function money(n){
+
+  return new Intl.NumberFormat(
+    "uz-UZ"
+  ).format(
+    Math.round(n)
+  ) + " so‘m";
+
+}
+
+
+/* =========================
+   AUTH STATE
+========================= */
+
+async function startApp(){
+
+  const {
+    data:{
+      session
+    }
+  } =
+    await supabaseClient
+      .auth
+      .getSession();
+
+
+  if(session){
+
+    currentUser =
+      session.user;
+
+    openApp();
+
+  }else{
+
+    showAuth();
+
+  }
+
+
+  supabaseClient
+    .auth
+    .onAuthStateChange(
+      async(event,session)=>{
+
+        if(session){
+
+          currentUser =
+            session.user;
+
+          openApp();
+
+        }else{
+
+          currentUser = null;
+
+          showAuth();
+
+        }
+
+      }
+    );
+
+}
+
+
+/* =========================
+   OPEN APP
+========================= */
+
+async function openApp(){
+
+  document
+    .getElementById("authCard")
+    .classList.add("hidden");
+
+  document
+    .getElementById("app")
+    .classList.remove("hidden");
+
+
+  document
+    .getElementById("userEmail")
+    .textContent =
+    currentUser.email || "Google user";
+
+
+  await loadGoal();
+
+}
+
+
+/* =========================
+   SHOW AUTH
+========================= */
+
+function showAuth(){
+
+  document
+    .getElementById("authCard")
+    .classList.remove("hidden");
+
+  document
+    .getElementById("app")
+    .classList.add("hidden");
+
+}
+
+
+startApp();
+
 </script>
-</body></html>
+
+</body>
+</html>
